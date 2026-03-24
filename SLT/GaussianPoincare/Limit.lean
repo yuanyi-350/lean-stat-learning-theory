@@ -210,7 +210,7 @@ lemma tendsto_cos_pow_exp (t : ℝ) :
 The law of Sₙ under the n-fold product Rademacher measure converges weakly to stdGaussian. -/
 theorem rademacherLaw_tendsto_stdGaussian :
     Tendsto (fun n : ℕ => rademacherLaw (n + 1)) atTop (𝓝 stdGaussian) := by
-  rw [ProbabilityMeasure.tendsto_iff_tendsto_charFun]
+  rw [ProbabilityMeasure.tendsto_iff_tendsto_charFun']
   intro t
   -- Characteristic function of rademacherLaw (n+1) equals (cos(t/√(n+1)))^(n+1)
   have hcf (n : ℕ) : charFun (rademacherLaw (n + 1)).toMeasure t =

@@ -13,6 +13,7 @@ __all__ = ["FileProcessor", "ProcessResult"]
 
 
 FORBIDDEN_PATTERN = re.compile(r"\b(?:axiom|admit)\b")
+WARNING_PATTERN = re.compile(r"\bwarning:")
 
 
 @dataclass(frozen=True)
@@ -74,13 +75,32 @@ class FileProcessor:
         return False, f"codex exited with code {result.returncode}"
 
     @staticmethod
-    def _run_lean(path: str) -> bool:
+    def _first_diagnostic(output: str) -> str | None:
+        for line in output.splitlines():
+            lowered = line.lower()
+            if "warning:" in lowered or "error:" in lowered:
+                return line.strip()
+        return None
+
+    @staticmethod
+    def _is_warning(diagnostic: str | None) -> bool:
+        return diagnostic is not None and bool(WARNING_PATTERN.search(diagnostic.lower()))
+
+    @classmethod
+    def _run_lean(cls, path: str) -> tuple[bool, str | None]:
         result = subprocess.run(
             ["lake", "env", "lean", path],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
         )
-        return result.returncode == 0
+        output = result.stdout or ""
+        diagnostic = cls._first_diagnostic(output)
+        if result.returncode != 0:
+            return False, diagnostic
+        if cls._is_warning(diagnostic):
+            return False, diagnostic
+        return True, None
 
     @staticmethod
     def _has_forbidden_terms(path: str) -> bool:
@@ -174,7 +194,8 @@ class FileProcessor:
 
     def process_path(self, path: str, prompt_template: str) -> ProcessResult:
         print(f"\n{self.tag} {path} — pre-check compilation")
-        if self._run_lean(path):
+        precheck_ok, last_lean_issue = self._run_lean(path)
+        if precheck_ok:
             if not self._validate_no_forbidden_terms(path):
                 print(
                     f"{self.tag} {path} forbidden terms check {self.fail_label}, retrying with codex.",
@@ -189,6 +210,14 @@ class FileProcessor:
                     failure_kind="git_failed",
                     message="git commit or push failed after pre-check success",
                 )
+        elif self._is_warning(last_lean_issue):
+            print(f"{self.tag} {path} compile has warning(s): {last_lean_issue}", file=sys.stderr)
+            print(
+                f"{self.tag} {path} warning check {self.fail_label}, retrying with codex.",
+                file=sys.stderr,
+            )
+        elif last_lean_issue is not None:
+            print(f"{self.tag} {path} lean diagnostic: {last_lean_issue}", file=sys.stderr)
 
         saw_successful_codex_run = False
         last_codex_error = None
@@ -206,7 +235,8 @@ class FileProcessor:
                 continue
 
             saw_successful_codex_run = True
-            if self._run_lean(path):
+            lean_ok, last_lean_issue = self._run_lean(path)
+            if lean_ok:
                 if not self._validate_no_forbidden_terms(path):
                     print(
                         f"{self.tag} {path} forbidden terms check {self.fail_label}.",
@@ -222,6 +252,12 @@ class FileProcessor:
                     message="git commit or push failed after codex success",
                     codex_log_path=log_path,
                 )
+            if self._is_warning(last_lean_issue):
+                print(f"{self.tag} {path} compile has warning(s): {last_lean_issue}", file=sys.stderr)
+                print(f"{self.tag} {path} warning check {self.fail_label}.", file=sys.stderr)
+                continue
+            if last_lean_issue is not None:
+                print(f"{self.tag} {path} lean diagnostic: {last_lean_issue}", file=sys.stderr)
 
             print(f"{self.tag} {path} compile {self.fail_label}.", file=sys.stderr)
 
@@ -239,6 +275,6 @@ class FileProcessor:
         return ProcessResult(
             ok=False,
             failure_kind="compile_failed",
-            message="Lean compile or validation did not succeed within retry budget",
+            message=last_lean_issue or "Lean compile or validation did not succeed within retry budget",
             codex_log_path=last_codex_log_path,
         )

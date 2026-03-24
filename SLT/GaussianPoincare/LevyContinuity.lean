@@ -25,7 +25,7 @@ import Mathlib.MeasureTheory.Measure.FiniteMeasureExt
 This file contains the Lévy continuity theorem, which states that weak convergence of
 probability measures is equivalent to pointwise convergence of their characteristic functions.
 
-The main result is `MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun`.
+The main result is `MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun'`.
 
 ## Attribution
 
@@ -258,7 +258,7 @@ lemma isTightMeasureSet_of_tendsto_limsup_inner_of_norm_eq_one
 
 /-- If the characteristic functions converge pointwise to a function which is continuous at 0,
 then `{μ n | n}` is tight. -/
-lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
+lemma isTightMeasureSet_of_tendsto_charFun' {μ : ℕ → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
     {f : E → ℂ} (hf : ContinuousAt f 0) (hf_meas : Measurable f)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
     IsTightMeasureSet (Set.range μ) := by
@@ -400,7 +400,7 @@ Originally from `Clt/Inversion.lean`.
 
 variable (𝕜 : Type*) [RCLike 𝕜]
 
-lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
+lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints'
     {E : Type*} [MeasurableSpace E]
     [MetricSpace E] [CompleteSpace E] [SecondCountableTopology E] [BorelSpace E]
     {μ : ℕ → ProbabilityMeasure E}
@@ -430,7 +430,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [MeasurableSpace E] [BorelSpace E]
   {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
 
-lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
+lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun'
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
     {g : E →ᵇ ℂ}
     (hg : g ∈ charPoly continuous_probChar (L := innerₗ E) continuous_inner) :
@@ -454,17 +454,17 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
   simp_rw [← charFun_eq_integral_probChar]
   exact h y
 
-lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun
+lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun'
     [FiniteDimensional ℝ E]
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
   have h_tight : IsTightMeasureSet (𝓧 := E) {μ n | n} :=
-    isTightMeasureSet_of_tendsto_charFun (by fun_prop) (by fun_prop) h
-  refine tendsto_of_tight_of_separatesPoints h_tight (𝕜 := ℂ)
+    isTightMeasureSet_of_tendsto_charFun' (by fun_prop) (by fun_prop) h
+  refine tendsto_of_tight_of_separatesPoints' h_tight (𝕜 := ℂ)
     (A := charPoly continuous_probChar (L := innerₗ E) continuous_inner) ?_ ?_
   · refine separatesPoints_charPoly continuous_probChar probChar_ne_one _ ?_
     exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
-  · exact fun g ↦ tendsto_charPoly_of_tendsto_charFun h
+  · exact fun g ↦ tendsto_charPoly_of_tendsto_charFun' h
 
 /--
 The Lévy continuity theorem https://en.wikipedia.org/wiki/L%C3%A9vy%27s_continuity_theorem.
@@ -479,11 +479,11 @@ The => direction is much harder:
 * μs is tight in `ℝ^d` if their `charFun`s converge to a function continuous at 0
 
 -/
-theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
+theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun'
     [FiniteDimensional ℝ E] :
     Tendsto μ atTop (𝓝 μ₀) ↔
       ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
-  refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
+  refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun'⟩
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto ℂ] at h
   simp_rw [charFun_eq_integral_innerProbChar]
   exact h (innerProbChar t)
