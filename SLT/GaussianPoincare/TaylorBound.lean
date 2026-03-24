@@ -248,9 +248,8 @@ theorem taylor_order_one {f : ℝ → ℝ} (hf : ContDiff ℝ 2 f) {a b : ℝ} (
   have hf' : ContDiffOn ℝ (1 + 1) f (Icc a b) := hf.contDiffOn
   obtain ⟨ξ, hξ_mem, hξ_eq⟩ := taylor_mean_remainder_lagrange_iteratedDeriv hab hf'
   use ξ, hξ_mem
-  -- Simplify the types
-  have hone_eq : (One.one : ℕ) = 1 := rfl
-  simp only [hone_eq] at hξ_eq
+  -- Simplify the numeric indices
+  norm_num at hξ_eq
   -- taylorWithinEval f 1 (Icc a b) a b = f(a) + f'(a)(b-a)
   have htaylor : taylorWithinEval f 1 (Icc a b) a b = f a + deriv f a * (b - a) := by
     rw [taylorWithinEval_succ, taylor_within_zero_eval]
@@ -266,9 +265,6 @@ theorem taylor_order_one {f : ℝ → ℝ} (hf : ContDiff ℝ 2 f) {a b : ℝ} (
   -- The remainder term: iteratedDeriv 2 f = deriv (deriv f)
   have hremainder : iteratedDeriv 2 f ξ = deriv (deriv f) ξ := congrFun (iteratedDeriv_two f) ξ
   rw [hremainder] at hξ_eq
-  -- Now simplify
-  have hfact : (2 : ℕ).factorial = 2 := rfl
-  simp only [hfact, Nat.cast_ofNat] at hξ_eq
   linarith [hξ_eq]
 
 /-- Taylor's theorem for b < a: there exists ξ in (b, a) such that
