@@ -327,7 +327,7 @@ lemma integral_id_gaussianReal_zero (v : NNReal) : ∫ x, x ∂(gaussianReal 0 v
       simp only [neg_one_mul, neg_zero, neg_one_sq] at this
       convert this using 2
       · ext x; ring
-      · simp only [NNReal.mk_one, one_mul]
+      · exact (one_mul v).symm
     -- So ∫ x, x = ∫ y, (-y) = -∫ y, y, hence both are 0
     have h_neg : ∫ x, x ∂(gaussianReal 0 v) = -(∫ y, y ∂(gaussianReal 0 v)) := by
       calc ∫ x, x ∂(gaussianReal 0 v)
