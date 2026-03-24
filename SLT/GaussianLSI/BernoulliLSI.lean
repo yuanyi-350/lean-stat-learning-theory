@@ -161,12 +161,11 @@ theorem bernoulli_flip_invariance (j : Fin n) :
 theorem bernoulli_integral_eq_sum {n : ℕ} (f : (Fin n → Bool) → ℝ) :
     ∫ ε, f ε ∂(bernoulliUniform n) = (∑ ε : Fin n → Bool, f ε) / 2^n := by
   unfold bernoulliUniform
-  rw [integral_smul_measure]
-  rw [integral_fintype _ (Integrable.of_finite)]
-  rw [card_fin_bool n]
-  simp only [Nat.cast_pow, Nat.cast_ofNat, smul_eq_mul, count_real_singleton, one_mul]
-  rw [ENNReal.toReal_inv, ENNReal.toReal_pow, ENNReal.toReal_ofNat]
-  ring
+  rw [integral_smul_measure, integral_count, card_fin_bool n, ENNReal.toReal_inv,
+    ENNReal.toReal_natCast]
+  rw [Nat.cast_pow, Nat.cast_ofNat]
+  simp only [smul_eq_mul]
+  ring_nf
 
 /-- Sum over Fin (n+1) → Bool decomposes as sum over slices by the last coordinate. -/
 theorem sum_fin_succ_bool_eq_sum_snoc {n : ℕ} (f : (Fin (n+1) → Bool) → ℝ) :
