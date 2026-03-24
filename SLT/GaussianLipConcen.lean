@@ -94,9 +94,7 @@ lemma lipschitz_gradNormSq_bound {f : (Fin n → ℝ) → ℝ} {L : ℝ} (hL : 0
     have h_parseval := b.sum_sq_norm_inner_right a
     -- For real inner products: ‖inner x y‖ = |inner x y|, and inner is symmetric
     have h_parseval' : ∑ i, (@inner ℝ E _ a (b i))^2 = ‖a‖^2 := by
-      convert h_parseval using 2 with i
-      rw [real_inner_comm]
-      rw [Real.norm_eq_abs, ← sq_abs]
+      simpa [real_inner_comm, Real.norm_eq_abs, sq_abs] using h_parseval
     -- ‖a‖ = ‖L‖ by Riesz isometry
     have h_norm : ‖a‖ = ‖L‖ := by
       simp only [a]
@@ -833,8 +831,7 @@ lemma lipschitz_gradNormSq_bound_E {f : EuclideanSpace ℝ (Fin n) → ℝ} {L :
     have ha : ∀ v, Lf v = @inner ℝ _ _ a v := fun v => InnerProductSpace.toDual_symm_apply.symm
     have h_parseval := b.sum_sq_norm_inner_right a
     have h_parseval' : ∑ i, (@inner ℝ _ _ a (b i))^2 = ‖a‖^2 := by
-      convert h_parseval using 2 with i
-      rw [real_inner_comm, Real.norm_eq_abs, ← sq_abs]
+      simpa [real_inner_comm, Real.norm_eq_abs, sq_abs] using h_parseval
     have h_norm : ‖a‖ = ‖Lf‖ := by simp only [a, LinearIsometryEquiv.norm_map]
     calc ∑ i, (Lf (b i))^2 = ∑ i, (@inner ℝ _ _ a (b i))^2 := by simp [ha]
       _ = ‖a‖^2 := h_parseval'
