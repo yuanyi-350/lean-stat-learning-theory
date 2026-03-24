@@ -1256,7 +1256,7 @@ theorem efronStein (f : (Fin n → Ω) → ℝ) (hf : MemLp f 2 μˢ) :
       have hpi_map : Measure.pi (fun _ : Fin 1 => μs 0) = (μs 0).map e.symm := by
         have h1 := hmp.map_eq
         have h2 : (Measure.map e (Measure.pi (fun _ : Fin 1 => μs 0))).map e.symm = (μs 0).map e.symm := by
-          rw [h1]
+          exact congrArg (Measure.map e.symm) h1
         rw [MeasurableEquiv.map_symm_map] at h2
         exact h2
       have hf_ae : AEStronglyMeasurable f ((μs 0).map e.symm) := by
