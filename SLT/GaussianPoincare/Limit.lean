@@ -55,7 +55,10 @@ lemma tendsto_pow_exp_of_isLittleO {f : ℕ → ℂ} (t : ℂ)
   rw [← tendsto_sub_nhds_zero_iff]
   apply hf.tendsto_inv_smul_nhds_zero.congr'
   filter_upwards [eventually_ne_atTop 0] with n h0
-  simpa [mul_sub] using mul_div_cancel₀ t (mod_cast h0)
+  have hn : (n : ℂ) ≠ 0 := by exact_mod_cast h0
+  rw [one_div, inv_inv]
+  change (n : ℂ) * (g n - t / ↑n) = ↑n * g n - t
+  rw [mul_sub, mul_div_cancel₀ _ hn]
 
 /-- The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f`
 is `f ^ n`. We express this in terms of the pushforward of the product measure by summation. -/
@@ -91,17 +94,22 @@ lemma charFun_rademacherMeasure (t : ℝ) : charFun rademacherMeasure t = Real.c
       ofReal_one, neg_mul, mul_neg, mul_one]
     -- Goal: 2⁻¹ • exp(-it) + 2⁻¹ • exp(it) = cos(t) where 2⁻¹ : ℝ
     -- Convert ℝ smul on ℂ to multiplication using `real_smul`
-    simp only [real_smul]
-    -- Goal: ↑(2⁻¹) * exp(it) + ↑(2⁻¹) * exp(-it) = cos(t)
-    rw [add_comm, ← mul_add]
-    -- Use Complex.two_cos: 2 * cos x = exp(x*I) + exp(-x*I)
-    rw [ofReal_inv]
-    have h := Complex.two_cos (↑t)
-    rw [neg_mul] at h
-    rw [← h]
-    simp only [ofReal_ofNat]
-    rw [show ((2 : ℂ))⁻¹ * ((2 : ℂ) * Complex.cos ↑t) = Complex.cos ↑t by field_simp]
-    exact (Complex.ofReal_cos t).symm
+    have hsmul1 : (2⁻¹ : ℝ) • Complex.exp (↑t * Complex.I) = ((2 : ℂ)⁻¹) * Complex.exp (↑t * Complex.I) := by
+      simp [Algebra.smul_def]
+    have hsmul2 : (2⁻¹ : ℝ) • Complex.exp (-(↑t * Complex.I)) = ((2 : ℂ)⁻¹) * Complex.exp (-(↑t * Complex.I)) := by
+      simp [Algebra.smul_def]
+    calc
+      (2⁻¹ : ℝ) • Complex.exp (-(↑t * Complex.I)) + (2⁻¹ : ℝ) • Complex.exp (↑t * Complex.I)
+          = ((2 : ℂ)⁻¹) * (Complex.exp (-(↑t * Complex.I)) + Complex.exp (↑t * Complex.I)) := by
+              simp [hsmul1, hsmul2, ← mul_add]
+      _ = Complex.cos ↑t := by
+          rw [add_comm]
+          have h := Complex.two_cos (↑t)
+          rw [neg_mul] at h
+          rw [← h]
+          ring_nf
+      _ = ↑(Real.cos t) := by
+          exact (Complex.ofReal_cos t).symm
   · exact Integrable.smul_measure (integrable_dirac (by simp : ‖_‖ₑ < ⊤)) (by simp)
   · exact Integrable.smul_measure (integrable_dirac (by simp : ‖_‖ₑ < ⊤)) (by simp)
 
