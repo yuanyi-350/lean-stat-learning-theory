@@ -101,7 +101,10 @@ theorem norm_euclidean_eq_sqrt_n_mul_empiricalNorm (hn : 0 < n) (v : EmpiricalSp
   simp only [dist_eq_norm] at h
   convert h using 2
   · show empiricalToEuclidean n v = empiricalToEuclidean n v - empiricalToEuclidean n 0
-    simp [empiricalToEuclidean]
+    have hzero : empiricalToEuclidean n (0 : EmpiricalSpace n) = 0 := by
+      ext i
+      rfl
+    rw [hzero, sub_zero]
   · show empiricalNorm n v = empiricalNorm n (v - (0 : EmpiricalSpace n))
     congr 1
     ext i
@@ -423,17 +426,13 @@ lemma submodule_closedBall_eq_inter (V : Submodule ℝ (EuclideanSpace ℝ (Fin 
   · rintro ⟨u, hu, rfl⟩
     constructor
     · -- ‖V.subtypeL u‖ ≤ r
-      have : ‖V.subtypeL u‖ = ‖u‖ := by
-        simp only [Submodule.subtypeL_apply, Submodule.coe_norm]
-      rw [this]
-      exact hu
+      simpa [Submodule.subtypeL_apply, Subtype.dist_eq, dist_zero_right] using hu
     · exact u.2
   · intro ⟨hball, hmem⟩
     use ⟨v, hmem⟩
     constructor
     · -- ‖⟨v, hmem⟩‖ ≤ r
-      simp only [Submodule.coe_norm]
-      exact hball
+      simpa [Subtype.dist_eq, dist_zero_right] using hball
     · simp only [Submodule.subtypeL_apply]
 
 /-- Linear isometry equivalence preserves closed balls -/
@@ -500,7 +499,8 @@ theorem linearCoveringNumber_le_euclideanBall_d (hn : 0 < n) (hd : 0 < d)
   -- e.symm maps ball_d to ball_V
   have he_symm_ball : e.symm '' (Metric.closedBall (0 : EuclideanSpace ℝ (Fin d)) (δ * Real.sqrt n)) =
       Metric.closedBall (0 : V) (δ * Real.sqrt n) := by
-    rw [e.symm.image_closedBall 0 (δ * Real.sqrt n), e.symm.map_zero]
+    rw [LeastSquares.LinearIsometryEquiv.image_closedBall e.symm (δ * Real.sqrt n)]
+    rfl
   -- So V.subtypeL '' ball_V = V.subtypeL '' (e.symm '' ball_d)
   rw [← he_symm_ball, ← Set.image_comp]
   -- The composition f = V.subtypeL ∘ e.symm is an isometric embedding
@@ -564,7 +564,8 @@ theorem linearCoveringNumber_le_euclideanBall_rank (hn : 0 < n)
   -- e.symm maps ball_r to ball_V
   have he_symm_ball : e.symm '' (Metric.closedBall (0 : EuclideanSpace ℝ (Fin (designMatrixRank x))) (δ * Real.sqrt n)) =
       Metric.closedBall (0 : V) (δ * Real.sqrt n) := by
-    rw [e.symm.image_closedBall 0 (δ * Real.sqrt n), e.symm.map_zero]
+    rw [LeastSquares.LinearIsometryEquiv.image_closedBall e.symm (δ * Real.sqrt n)]
+    rfl
   -- So V.subtypeL '' ball_V = V.subtypeL '' (e.symm '' ball_r)
   rw [← he_symm_ball, ← Set.image_comp]
   -- The composition f = V.subtypeL ∘ e.symm is an isometric embedding
