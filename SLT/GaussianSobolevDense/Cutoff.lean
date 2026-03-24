@@ -200,7 +200,7 @@ lemma cutoff_L2_convergence (f : E n → ℝ) (hf : MemLp f 2 (stdGaussianE n)) 
   -- First, show that |f|² is integrable (i.e., ∫⁻ |f|² < ∞)
   have hf_sq_int : ∫⁻ x, (‖f x‖₊ : ℝ≥0∞) ^ (2 : ℝ) ∂(stdGaussianE n) < ⊤ := by
     have hlt := hf.eLpNorm_lt_top
-    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
         (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)] at hlt
     simp only [ENNReal.toReal_ofNat, one_div, enorm_eq_nnnorm] at hlt
     by_contra habs
@@ -312,7 +312,7 @@ lemma cutoff_L2_convergence (f : E n → ℝ) (hf : MemLp f 2 (stdGaussianE n)) 
   have heLpNorm_eq : ∀ R, eLpNorm (fun x => f x * (1 - smoothCutoffR R x)) 2 (stdGaussianE n) =
       (∫⁻ x, F R x ∂(stdGaussianE n)) ^ (2⁻¹ : ℝ) := by
     intro R
-    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
         (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
     simp only [ENNReal.toReal_ofNat, one_div, enorm_eq_nnnorm, F]
   simp only [heLpNorm_eq]
@@ -407,7 +407,7 @@ lemma cutoff_gradient_error_bound (f : E n → ℝ)
 
   have hg_sq_int : ∫⁻ x, (‖g x‖₊ : ℝ≥0∞) ^ (2 : ℝ) ∂(stdGaussianE n) < ⊤ := by
     have hlt := hf_grad.eLpNorm_lt_top
-    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
         (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)] at hlt
     simp only [ENNReal.toReal_ofNat, one_div, enorm_eq_nnnorm, g] at hlt ⊢
     by_contra habs
@@ -467,7 +467,7 @@ lemma cutoff_gradient_error_bound (f : E n → ℝ)
   have heLpNorm_eq : ∀ R, eLpNorm (fun x => (1 - smoothCutoffR R x) • fderiv ℝ f x) 2 (stdGaussianE n) =
       (∫⁻ x, F R x ∂(stdGaussianE n)) ^ (2⁻¹ : ℝ) := by
     intro R
-    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+    rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
         (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
     simp only [ENNReal.toReal_ofNat, one_div, enorm_eq_nnnorm, F, g]
   simp only [heLpNorm_eq]
