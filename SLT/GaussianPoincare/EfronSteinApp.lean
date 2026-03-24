@@ -330,11 +330,7 @@ lemma rademacher_values_ae {Ω : Type*} [MeasurableSpace Ω]
     simp only [rademacherMeasure]
     rw [ae_add_measure_iff]
     have hmeas : MeasurableSet {x : ℝ | x = 1 ∨ x = -1} := by measurability
-    constructor <;> {
-      rw [Measure.ae_smul_measure_iff (by norm_num : (1/2 : ℝ≥0∞) ≠ 0)]
-      rw [ae_dirac_iff hmeas]
-      simp
-    }
+    constructor <;> simp
   rw [← hε] at hsupp
   -- ε is measurable since map ε P = rademacherMeasure ≠ 0
   have hmeas' : AEMeasurable ε P := by
