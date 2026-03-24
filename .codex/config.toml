@@ -1,0 +1,14 @@
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[mcp_servers.lean_lsp]
+command = "uvx"
+args = ["lean-lsp-mcp"]
+cwd = "/root/lean-stat-learning-theory"
+startup_timeout_sec = 120
+tool_timeout_sec = 180
+required = false
+
+[mcp_servers.lean_lsp.env]
+LEAN_PROJECT_PATH = "/root/lean-stat-learning-theory"
+LEAN_LOG_LEVEL = "INFO"

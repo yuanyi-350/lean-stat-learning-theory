@@ -1,0 +1,6 @@
+[email]
+smtp_server = "smtp.126.com"             # SMTP 服务器地址 (如 smtp.gmail.com, smtp.163.com)
+smtp_port = 465                         # SSL 加密端口通常为 465
+sender_email = "kysyy2@126.com"      # 你的发件人邮箱
+sender_password = "______________"   # 你的邮箱授权码 (非登录密码)
+receiver_email = "kysyy1@126.com" # 收件人邮箱
