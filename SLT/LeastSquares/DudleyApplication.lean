@@ -1028,8 +1028,8 @@ lemma dudley_empiricalProcess (n : ℕ) (hn : 0 < n) (x : Fin n → X)
           funext i
           show (0 : ℝ) - empiricalMetricImage n x g i = -(empiricalMetricImage n x g i)
           ring
-        rw [h_sub, empiricalNorm_neg]
-        rfl
+        rw [h_sub]
+        simpa [empiricalMetricImage] using empiricalNorm_neg n (empiricalMetricImage n x g)
       rw [h_dist_zero] at h_diam
       have h_norm_bound : empiricalNorm n (fun i => g (x i)) ≤ D := le_trans h_diam hdiam
       have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
