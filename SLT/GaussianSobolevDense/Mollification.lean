@@ -172,7 +172,7 @@ lemma mollify_tendsto_pointwise {n : ℕ} {g : E n → ℝ} (hg_cont : Continuou
       have h_mol_one : ∀ y : E 0, stdMollifierPi 0 ε y = 1 := by
         intro y
         unfold stdMollifierPi
-        simp only [Fintype.univ_ofIsEmpty, Finset.prod_empty]
+        simp
       conv_lhs =>
         arg 1; arg 1; arg 2; ext y
         rw [h_mol_one y, mul_one]
