@@ -249,8 +249,11 @@ lemma linear_bddAbove_at_radius (hn : 0 < n)
   let hx : EuclideanSpace ℝ (Fin n) := (WithLp.equiv 2 (Fin n → ℝ)).symm (fun i => h (x i))
   -- |n⁻¹ * ∑ w_i h(x_i)| ≤ n⁻¹ * √n * ‖w‖ * u
   have h_sum_eq : ∑ i, w i * h (x i) = @inner ℝ _ _ w' hx := by
-    simp only [w', hx, EuclideanSpace.inner_eq_star_dotProduct]
-    simp only [WithLp.equiv_symm_apply_ofLp]
+    dsimp [w', hx]
+    rw [show inner ℝ (WithLp.toLp 2 w) (WithLp.toLp 2 fun i => h (x i)) =
+        (fun i => h (x i)) ⬝ᵥ star w by
+      simpa using EuclideanSpace.inner_eq_star_dotProduct
+        (WithLp.toLp 2 w) (WithLp.toLp 2 fun i => h (x i))]
     -- For real numbers, star w = w (trivial star)
     have h_star : star w = w := by ext i; simp [star_trivial]
     rw [h_star, dotProduct_comm]
