@@ -5,12 +5,19 @@ Authors: Thomas Zhu, Rémy Degenne
 -/
 import Mathlib.MeasureTheory.Measure.IntegralCharFun
 import Mathlib.MeasureTheory.Measure.TightNormed
-import Mathlib.MeasureTheory.Measure.CharacteristicFunction
+import Mathlib.Analysis.Fourier.BoundedContinuousFunctionChar
+import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Analysis.InnerProductSpace.ProdL2
+import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 import Mathlib.MeasureTheory.Measure.Prokhorov
 import Mathlib.MeasureTheory.Measure.LevyProkhorovMetric
 import Mathlib.Topology.MetricSpace.Sequences
 import Mathlib.Order.Monotone.Union
 import Mathlib.Analysis.Fourier.FourierTransformDeriv
+import Mathlib.MeasureTheory.Group.IntegralConvolution
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.MeasureTheory.Measure.FiniteMeasureExt
 
 /-!
 # The Lévy Continuity Theorem
@@ -93,7 +100,7 @@ theorem contDiff_charFun
     ContDiff ℝ n (charFun μ) := by
   have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : E → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
-    rw [Nat.cast_le] at hk
+    rw [ENat.coe_le_coe] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext charFun_eq_fourierIntegral']
   refine (VectorFourier.contDiff_fourierIntegral (L := innerSL ℝ) hint').comp ?_
@@ -121,7 +128,7 @@ section Tight
 open MeasureTheory ProbabilityTheory Filter
 open scoped ENNReal NNReal Topology RealInnerProductSpace
 
-lemma tendsto_iSup_of_tendsto_limsup {u : ℕ → ℝ → ℝ≥0∞}
+lemma tendsto_iSup_of_tendsto_limsup' {u : ℕ → ℝ → ℝ≥0∞}
     (h_all : ∀ n, Tendsto (u n) atTop (𝓝 0))
     (h_tendsto : Tendsto (fun r : ℝ ↦ limsup (fun n ↦ u n r) atTop) atTop (𝓝 0))
     (h_anti : ∀ n, Antitone (u n)) :
@@ -176,7 +183,7 @@ lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt
     IsTightMeasureSet (Set.range μ) := by
   refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
   simp_rw [iSup_range]
-  refine tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) h fun n u v huv ↦ ?_
+  refine tendsto_iSup_of_tendsto_limsup' (fun n ↦ ?_) h fun n u v huv ↦ ?_
   · have h_tight : IsTightMeasureSet {μ n} := isTightMeasureSet_singleton
     rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
     simpa using h_tight
@@ -189,7 +196,8 @@ lemma isTightMeasureSet_iff_tendsto_limsup_measure_norm_gt :
       ↔ Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0) := by
   refine ⟨fun h ↦ ?_, isTightMeasureSet_of_tendsto_limsup_measure_norm_gt⟩
   have h_sup := tendsto_measure_norm_gt_of_isTightMeasureSet h
-  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_sup (fun _ ↦ zero_le') ?_
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_sup
+    (fun _ ↦ show (0 : ℝ≥0∞) ≤ _ from zero_le _) ?_
   intro r
   simp_rw [iSup_range]
   exact limsup_le_iSup
@@ -205,7 +213,7 @@ lemma isTightMeasureSet_of_tendsto_limsup_inner
     IsTightMeasureSet (Set.range μ) := by
   refine isTightMeasureSet_of_inner_tendsto (𝕜 := ℝ) fun z ↦ ?_
   simp_rw [iSup_range]
-  refine tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) (h z) fun n u v huv ↦ ?_
+  refine tendsto_iSup_of_tendsto_limsup' (fun n ↦ ?_) (h z) fun n u v huv ↦ ?_
   · have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪z, x⟫)} := isTightMeasureSet_singleton
     rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
     have h_map r : (μ n).map (fun x ↦ ⟪z, x⟫) {x | r < |x|} = μ n {x | r < |⟪z, x⟫|} := by
@@ -221,7 +229,7 @@ lemma isTightMeasureSet_iff_tendsto_limsup_inner :
   refine ⟨fun h z ↦ ?_, isTightMeasureSet_of_tendsto_limsup_inner⟩
   rw [isTightMeasureSet_iff_inner_tendsto ℝ] at h
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds (h z)
-    (fun _ ↦ zero_le') fun r ↦ ?_
+    (fun _ ↦ show (0 : ℝ≥0∞) ≤ _ from zero_le _) fun r ↦ ?_
   simp_rw [iSup_range]
   exact limsup_le_iSup
 
@@ -263,7 +271,8 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       rw [ENNReal.ofReal_toReal]
       refine ne_top_of_le_ne_top (by simp : 1 ≠ ∞) ?_
       refine limsup_le_of_le ?_ (.of_forall fun _ ↦ prob_le_one)
-      exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ zero_le'
+      exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦
+        show (0 : ℝ≥0∞) ≤ _ from zero_le _
     simp_rw [h_ofReal]
     rw [← ENNReal.ofReal_zero]
     exact ENNReal.tendsto_ofReal this
@@ -433,7 +442,8 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
     simp_rw [hw]
     rw [integral_finset_sum]
     · congr with y
-      rw [integral_const_mul]
+      simpa using MeasureTheory.integral_const_mul (μ := μ) (r := w y)
+        (f := fun x : E ↦ (probChar (innerₗ E x y) : ℂ))
     · intro i hi
       refine Integrable.const_mul ?_ _
       change Integrable (fun x ↦ innerProbChar i x) μ
