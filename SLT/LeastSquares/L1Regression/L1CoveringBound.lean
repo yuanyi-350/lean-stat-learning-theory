@@ -309,8 +309,7 @@ lemma maureyPMF_mean_coord (x : Fin n → EuclideanSpace ℝ (Fin d))
   simp_rw [hterm_eq, mul_assoc]
   -- Sum equals (1/√n) * ⟨θ, x_i⟩
   -- Now LHS = ∑ j, 1 / √n * (θ j * (x i) j)
-  rw [PiLp.inner_apply]
-  simp only [RCLike.inner_apply, RCLike.conj_to_real]
+  simp [PiLp.inner_apply]
   -- Now RHS = 1 / √n * ∑ j, (x i) j * θ j
   -- Factor out 1/√n from LHS
   rw [← Finset.mul_sum]
@@ -318,7 +317,8 @@ lemma maureyPMF_mean_coord (x : Fin n → EuclideanSpace ℝ (Fin d))
   congr 1
   apply Finset.sum_congr rfl
   intro j _
-  ring
+  change θ j * (x i) j = (x i) j * (starRingEnd ℝ) (θ j)
+  simp [mul_comm]
 
 /-- Sum of squared coordinates bound for empirical average -/
 lemma maureyPMF_variance_bound (x : Fin n → EuclideanSpace ℝ (Fin d))
@@ -456,7 +456,8 @@ lemma maurey_exists_good_sample (x : Fin n → EuclideanSpace ℝ (Fin d))
         show empiricalNorm n ((0 : EmpiricalSpace n) - target) = empiricalNorm n target
         have hsub : (0 : EmpiricalSpace n) - target = -target := by
           funext i; exact zero_sub (target i)
-        rw [hsub, empiricalNorm_neg]
+        rw [hsub]
+        simpa using empiricalNorm_neg n target
       rw [hdist_emp]
       have htarget_le : empiricalNorm n target ≤ l1norm θ := by
         have hinner := empiricalNorm_le_l1norm_of_columnNormBound x θ hcol hn
@@ -511,7 +512,8 @@ lemma maurey_exists_good_sample (x : Fin n → EuclideanSpace ℝ (Fin d))
         show empiricalNorm n ((0 : EmpiricalSpace n) - target) = empiricalNorm n target
         have hsub : (0 : EmpiricalSpace n) - target = -target := by
           funext i; exact zero_sub (target i)
-        rw [hsub, empiricalNorm_neg]
+        rw [hsub]
+        simpa using empiricalNorm_neg n target
       rw [hdist_emp]
       have htarget_le : empiricalNorm n target ≤ l1norm θ := by
         have hinner := empiricalNorm_le_l1norm_of_columnNormBound x θ hcol hn
@@ -624,7 +626,7 @@ lemma maurey_exists_good_sample (x : Fin n → EuclideanSpace ℝ (Fin d))
               have hl1_nonneg : 0 ≤ l1norm θ := Finset.sum_nonneg (s := Finset.univ) (fun i _ => norm_nonneg (θ i))
               have hR_nonneg : 0 ≤ R := le_of_lt hR
               have hE_eq : E = ∫ f, distSq f ∂ν := by
-                rw [MeasureTheory.integral_fintype _ (Integrable.of_finite)]
+                rw [MeasureTheory.integral_fintype (Integrable.of_finite)]
                 simp only [E, smul_eq_mul]
                 congr 1
                 ext f
@@ -909,7 +911,8 @@ lemma exists_maureyAvg_close (x : Fin n → EuclideanSpace ℝ (Fin d))
         show empiricalNorm n ((0 : EmpiricalSpace n) - target) = empiricalNorm n target
         have : (0 : EmpiricalSpace n) - target = -target := by
           funext i; exact zero_sub (target i)
-        rw [this, empiricalNorm_neg]
+        rw [this]
+        simpa using empiricalNorm_neg n target
       have htarget_le : empiricalNorm n target ≤ l1norm θ := by
         have hinner := empiricalNorm_le_l1norm_of_columnNormBound x θ hcol hn
         have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
